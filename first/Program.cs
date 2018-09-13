@@ -43,6 +43,7 @@ namespace first
 
         public static void Main(string[] args)
         {
+            ///Читаем
             var nodes = new List<Node>();
             var filename = "input.txt";
             var lines = File.ReadAllLines(filename);
