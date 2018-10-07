@@ -11,12 +11,14 @@ namespace first
         public int X;
         public int Y;
         public int treeId;
+        public Node next;
 
         public Node(int x, int y, int treeId)
         {
             X = x;
             Y = y;
             this.treeId = treeId;
+            next = this;
         }
     }
 
@@ -36,6 +38,8 @@ namespace first
 
     internal class Program
     {
+        public static int[] size;
+
         public static int Weight(Node a, Node b)
         {
             return Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
@@ -45,13 +49,15 @@ namespace first
         {
             ///Читаем
             var nodes = new List<Node>();
-            var filename = "input.txt";
+            var filename = "in.txt";
             var lines = File.ReadAllLines(filename);
             var n = int.Parse(lines[0]);
+            size = new int[n+1];
             for (int i = 1; i < lines.Length; i++)
             {
                 var coords = lines[i].Split(' ');
                 nodes.Add(new Node(int.Parse(coords[0]), int.Parse(coords[1]), i));
+                size[i] = 1;
             }
 
             var edgeList = new List<Edge>();
@@ -66,20 +72,25 @@ namespace first
                 }
             }
 
+            //Сортируем ребра по весу 
             edgeList = edgeList.OrderBy(x => x.weight).ToList();
 
             var res = new List<Edge>();
 
             foreach (var edge in edgeList)
             {
-                if (nodes[edge.startPointIndex].treeId != nodes[edge.endPointIndex].treeId)
+                var v = nodes[edge.startPointIndex];
+                var w = nodes[edge.endPointIndex];
+                var p = v.treeId;
+                var q = w.treeId;
+                if (p != q)
                 {
+                    if (size[p] > size[q])
+                        merge(v, w, size);
+                    else
+                        merge(w, v, size);
+
                     res.Add(edge);
-                    var oldId = nodes[edge.endPointIndex].treeId;
-                    var newId = nodes[edge.startPointIndex].treeId;
-                    foreach (var node in nodes)
-                        if (node.treeId == oldId)
-                            node.treeId = newId;
                 }
             }
 
@@ -99,11 +110,35 @@ namespace first
                 line.Add(0);
             }
 
+
+            var resLine = "";
             foreach (var line in matrix)
             {
-                Console.WriteLine(string.Join(" ", line));
+                resLine += string.Join(" ", line);
+                resLine += "\r\n";
             }
 
+            File.WriteAllText("out.txt", resLine);
+        }
+
+        public static void merge(Node v, Node w, int[] size)
+        {
+            var p = v.treeId;
+            var q = w.treeId;
+
+            w.treeId = p;
+            var u = w.next;
+            while (u.treeId != p)
+            {
+                u.treeId = p;
+                u = u.next;
+            }
+
+            size[p] = size[p] + size[q];
+            var x = v.next;
+            var y = w.next;
+            v.next = y;
+            v.next = x;
         }
     }
 }
