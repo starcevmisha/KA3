@@ -53,7 +53,7 @@ namespace second
         public static void Main(string[] args)
         {
             ///Читаем
-            var filename = "input.txt";
+            var filename = "in.txt";
             var lines = File.ReadAllLines(filename);
             var n = int.Parse(lines[0]);
             var c = new int[n, n];
@@ -84,7 +84,6 @@ namespace second
             do
             {
                 var previous = FindPath(s, t, n, c, f);
-                Console.WriteLine(string.Join(" ", previous));
                 
                 if (h[t] < INFINITY)
                 {
@@ -102,9 +101,9 @@ namespace second
                 }
             } while (h[t] != INFINITY);
 
-            
-            Console.WriteLine(fValue);
+
             var resLine = "";
+            resLine += $"{fValue}\r\n";
             for (int i = 0; i < n; i++)
             {
                 for (int j = 0; j < n; j++)
@@ -115,7 +114,10 @@ namespace second
                 resLine += "\r\n";
             }
 
-            Console.WriteLine(resLine);
+            
+            
+            File.WriteAllText("out.txt", resLine);
+            
         }
     }
 }
