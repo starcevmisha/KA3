@@ -34,6 +34,11 @@ namespace first
             this.startPointIndex = startPointIndex;
             this.endPointIndex = endPointIndex;
         }
+
+        public override string ToString()
+        {
+            return $"{startPointIndex} {endPointIndex} {weight}";
+        }
     }
 
     internal class Program
@@ -52,7 +57,7 @@ namespace first
             var filename = "in.txt";
             var lines = File.ReadAllLines(filename);
             var n = int.Parse(lines[0]);
-            size = new int[n+1];
+            size = new int[n + 1];
             for (int i = 1; i < lines.Length; i++)
             {
                 var coords = lines[i].Split(' ');
@@ -74,11 +79,16 @@ namespace first
 
             //Сортируем ребра по весу 
             edgeList = edgeList.OrderBy(x => x.weight).ToList();
-
-            var res = new List<Edge>();
-
+            var edgeQueue = new Queue<Edge>();
             foreach (var edge in edgeList)
+                edgeQueue.Enqueue(edge);
+
+
+            var mst = new List<Edge>();
+
+            while (mst.Count != n - 1)
             {
+                var edge = edgeQueue.Dequeue();
                 var v = nodes[edge.startPointIndex];
                 var w = nodes[edge.endPointIndex];
                 var p = v.treeId;
@@ -86,11 +96,11 @@ namespace first
                 if (p != q)
                 {
                     if (size[p] > size[q])
-                        merge(v, w, size);
+                        Merge(v, w, size);
                     else
-                        merge(w, v, size);
+                        Merge(w, v, size);
 
-                    res.Add(edge);
+                    mst.Add(edge);
                 }
             }
 
@@ -98,16 +108,18 @@ namespace first
             for (int i = 0; i < n; i++)
                 matrix.Add(new List<int>());
 
-            foreach (var edge in res)
+            var sum = 0;
+            foreach (var edge in mst)
             {
                 matrix[edge.startPointIndex].Add(edge.endPointIndex + 1);
                 matrix[edge.endPointIndex].Add(edge.startPointIndex + 1);
+                sum += edge.weight;
             }
 
-            foreach (var line in matrix)
+            foreach (var t in matrix)
             {
-                line.Sort();
-                line.Add(0);
+                t.Sort();
+                t.Add(0);
             }
 
 
@@ -118,10 +130,12 @@ namespace first
                 resLine += "\r\n";
             }
 
+            resLine += sum;
+            resLine += "\r\n";
             File.WriteAllText("out.txt", resLine);
         }
 
-        public static void merge(Node v, Node w, int[] size)
+        public static void Merge(Node v, Node w, int[] size)
         {
             var p = v.treeId;
             var q = w.treeId;
@@ -138,7 +152,7 @@ namespace first
             var x = v.next;
             var y = w.next;
             v.next = y;
-            v.next = x;
+            w.next = x;
         }
     }
 }
