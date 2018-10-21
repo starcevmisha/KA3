@@ -8,12 +8,12 @@ namespace second
     {
         const int INFINITY = 10000;
 
-        private static int[] h;
+        private static int[] h;//массив в котором будем хранить дельты
         private static int[] choice; //Массив в котором будем хранить тип дуги(прямая/обратная)
 
         public static int[] FindPath(int s, int t, int n, int[,] c, int[,] f)
         {
-            for (int i = 0; i < n; i++) //массив в котором будем хранить дельты
+            for (int i = 0; i < n; i++) 
                 h[i] = INFINITY;
 
             var previous = new int[n];
@@ -50,6 +50,43 @@ namespace second
             return previous;
         }
 
+        public static int[,] FindMaxThread(int n, int s, int t, int[,] c, out int fValue)
+        {
+            h = new int[n];
+            choice = new int[n];
+            choice[s] = 1;
+
+            var f = new int[n, n];
+            fValue = 0;
+
+            for (var v = 0; v < n; v++)
+            for (var w = 0; w < n; w++)
+                f[v, w] = 0;
+
+
+            do
+            {
+                var previous = FindPath(s, t, n, c, f);
+
+                if (h[t] < INFINITY)
+                {
+                    fValue += h[t];
+                    var v = t;
+                    while (v != s)
+                    {
+                        var w = previous[v];
+                        if (choice[v] == 1)
+                            f[w, v] += h[t];
+                        else
+                            f[v, w] -= h[t];
+                        v = w;
+                    }
+                }
+            } while (h[t] != INFINITY);
+
+            return f;
+        }
+
         public static void Main(string[] args)
         {
             ///Читаем
@@ -66,40 +103,10 @@ namespace second
                 }
             }
 
-            var s = int.Parse(lines[n + 1]);
-            var t = int.Parse(lines[n + 2]);
+            var s = int.Parse(lines[n + 1])-1;
+            var t = int.Parse(lines[n + 2])-1;
 
-            h = new int[n];
-            choice = new int[n];
-            choice[s] = 1;
-
-            var f = new int[n, n];
-            var fValue = 0;
-
-            for (var v = 0; v < n; v++)
-            for (var w = 0; w < n; w++)
-                f[v, w] = 0;
-
-
-            do
-            {
-                var previous = FindPath(s, t, n, c, f);
-                
-                if (h[t] < INFINITY)
-                {
-                    fValue += h[t];
-                    var v = t;
-                    while (v != s)
-                    {
-                        var w = previous[v];
-                        if (choice[w] == 1)
-                            f[w, v] += h[t];
-                        else
-                            f[v, w] -= h[t];
-                        v = w;
-                    }
-                }
-            } while (h[t] != INFINITY);
+            var f = FindMaxThread(n, s, t, c, out var fValue);
 
 
             var resLine = "";
